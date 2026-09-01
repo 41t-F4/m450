@@ -1,0 +1,13 @@
+# Modul-Unterlagen
+m450-main/
+
+zusammenfassung/
+recording-scripts/
+CLAUDE.md
+
+# IDE / Build
+.idea/
+out/
+target/
+*.class
+.DS_Store
