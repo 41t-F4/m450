@@ -22,18 +22,13 @@ public class SavingsAccountTests {
         assertTrue(account.deposit(1, 5000));
         assertEquals(5000, account.getBalance());
 
-        // mehr abheben als vorhanden -> abgelehnt
+        // mehr als der Saldo geht nicht, genau der Saldo schon
         assertFalse(account.withdraw(2, 5001));
         assertEquals(5000, account.getBalance());
-
-        // exakt den Saldo abheben ist erlaubt (Grenzfall)
         assertTrue(account.withdraw(3, 5000));
         assertEquals(0, account.getBalance());
 
-        // bei Saldo 0 ist gar nichts mehr abhebbar
         assertFalse(account.withdraw(4, 1));
-
-        // negativer Betrag wird abgelehnt (Regel der Basisklasse)
         assertFalse(account.withdraw(5, -100));
         assertEquals(0, account.getBalance());
     }

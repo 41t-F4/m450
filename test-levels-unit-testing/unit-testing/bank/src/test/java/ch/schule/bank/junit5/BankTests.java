@@ -31,26 +31,19 @@ public class BankTests {
         System.setOut(originalOut);
     }
 
-    private ByteArrayOutputStream captureStdout() {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(buffer));
-        return buffer;
-    }
-
     /**
      * Tests to create new Accounts.
      */
     @Test
     public void testCreate() {
-        // Ids beginnen bei 1000 und zählen über alle Kontoarten hoch
+        // Kontonummern starten bei 1000 und zählen über alle Kontoarten hoch
         assertEquals("S-1000", bank.createSavingsAccount());
         assertEquals("Y-1001", bank.createPromoYouthSavingsAccount());
         assertEquals("P-1002", bank.createSalaryAccount(-50000));
 
-        // positive Kreditlimite ist ungültig -> null
+        // positive Kreditlimite ist ungültig
         assertNull(bank.createSalaryAccount(10000));
 
-        // nach dem Fehlversuch geht die Nummerierung normal weiter
         assertEquals("S-1003", bank.createSavingsAccount());
     }
 
@@ -64,10 +57,7 @@ public class BankTests {
         assertTrue(bank.deposit(id, 10, 5000));
         assertEquals(5000, bank.getBalance(id));
 
-        // unbekanntes Konto
-        assertFalse(bank.deposit("S-9999", 10, 5000));
-
-        // ungültiger Betrag wird ans Konto delegiert und abgelehnt
+        assertFalse(bank.deposit("S-9999", 10, 5000)); // Konto gibts nicht
         assertFalse(bank.deposit(id, 11, -1));
         assertEquals(5000, bank.getBalance(id));
     }
@@ -83,10 +73,9 @@ public class BankTests {
         assertTrue(bank.withdraw(id, 11, 3000));
         assertEquals(2000, bank.getBalance(id));
 
-        // unbekanntes Konto
-        assertFalse(bank.withdraw("S-9999", 11, 100));
+        assertFalse(bank.withdraw("S-9999", 11, 100)); // Konto gibts nicht
 
-        // Sparkonto darf nicht überzogen werden
+        // Sparkonto kann man nicht überziehen
         assertFalse(bank.withdraw(id, 12, 99999));
         assertEquals(2000, bank.getBalance(id));
     }
@@ -99,18 +88,20 @@ public class BankTests {
         String id = bank.createSavingsAccount();
         bank.deposit(id, 0, 100000);
 
-        ByteArrayOutputStream out = captureStdout();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out));
         bank.print(id);
         assertTrue(out.toString().contains("Kontoauszug 'S-1000'"));
 
-        // unbekanntes Konto: keine Ausgabe, kein Absturz
-        ByteArrayOutputStream out2 = captureStdout();
+        // unbekanntes Konto gibt einfach nichts aus
+        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out2));
         bank.print("S-9999");
         assertEquals("", out2.toString());
     }
 
     /**
-     * Experimente mit print(year, month).
+     * Experimente mit print(year,month).
      */
     @Test
     public void testMonthlyPrint() {
@@ -118,7 +109,8 @@ public class BankTests {
         bank.deposit(id, 0, 100000);  // Januar 1970
         bank.deposit(id, 35, 50000);  // Februar 1970
 
-        ByteArrayOutputStream out = captureStdout();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out));
         bank.print(id, 1970, 1);
         String output = out.toString();
 
@@ -126,18 +118,14 @@ public class BankTests {
         assertTrue(output.contains("01.01.1970"));
         assertFalse(output.contains("06.02.1970"));
 
-        // unbekanntes Konto: keine Ausgabe, kein Absturz
-        ByteArrayOutputStream out2 = captureStdout();
+        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out2));
         bank.print("S-9999", 1970, 1);
         assertEquals("", out2.toString());
     }
 
     /**
      * Testet den Gesamtkontostand der Bank.
-     *
-     * Achtung: Bank.getBalance() rechnet aus Sicht der BANK.
-     * Kundenguthaben sind Verbindlichkeiten, deshalb ist das
-     * Resultat das NEGATIV der Summe aller Kontostände.
      */
     @Test
     public void testBalance() {
@@ -148,6 +136,7 @@ public class BankTests {
         bank.deposit(s, 1, 5000);
         bank.deposit(p, 1, 3000);
 
+        // aus Sicht der Bank sind Kundenguthaben Schulden, darum negativ
         assertEquals(-8000, bank.getBalance());
 
         bank.withdraw(p, 2, 4000); // Lohnkonto geht 1000 ins Minus
@@ -155,27 +144,28 @@ public class BankTests {
     }
 
     /**
-     * Tested die Ausgabe der "top 5" Konten (höchste Saldi zuerst).
+     * Tested die Ausgabe der "top 5" Konten.
      */
     @Test
     public void testTop5() {
-        // 6 Konten mit unterschiedlichen Saldi -> nur 5 dürfen erscheinen
+        // 6 Konten anlegen, nur 5 dürfen ausgegeben werden
         for (int i = 0; i < 6; i++) {
-            String id = bank.createSavingsAccount(); // S-1000 .. S-1005
-            bank.deposit(id, 1, (i + 1) * 1000L);    // 1000 .. 6000
+            String id = bank.createSavingsAccount();
+            bank.deposit(id, 1, (i + 1) * 1000L);
         }
 
-        ByteArrayOutputStream out = captureStdout();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out));
         bank.printTop5();
         String[] lines = out.toString().trim().split("\\R");
 
-        assertEquals(5, lines.length, "es dürfen nur 5 Konten ausgegeben werden");
+        assertEquals(5, lines.length);
         assertEquals("S-1005: 6000", lines[0].trim());
         assertEquals("S-1001: 2000", lines[4].trim());
     }
 
     /**
-     * Tested die Ausgabe der "bottom 5" Konten (tiefste Saldi zuerst).
+     * Tested die Ausgabe der "bottom 5" Konten.
      */
     @Test
     public void testBottom5() {
@@ -184,7 +174,8 @@ public class BankTests {
             bank.deposit(id, 1, (i + 1) * 1000L);
         }
 
-        ByteArrayOutputStream out = captureStdout();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out));
         bank.printBottom5();
         String[] lines = out.toString().trim().split("\\R");
 

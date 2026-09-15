@@ -1,31 +1,23 @@
 package ch.m450.calculator;
 
-/**
- * Simpler Rechner für die JUnit-Einführung (M450, Unit-Testing Aufgabe 1).
- */
 public class Calculator {
 
-    public double add(double summand1, double summand2) {
-        return summand1 + summand2;
+    public double add(double a, double b) {
+        return a + b;
     }
 
-    public double subtract(double minuend, double subtrahend) {
-        return minuend - subtrahend;
+    public double subtract(double a, double b) {
+        return a - b;
     }
 
-    public double multiply(double factor1, double factor2) {
-        return factor1 * factor2;
+    public double multiply(double a, double b) {
+        return a * b;
     }
 
-    /**
-     * Dividiert dividend durch divisor.
-     *
-     * @throws ArithmeticException bei Division durch 0
-     */
-    public double divide(double dividend, double divisor) {
-        if (divisor == 0) {
+    public double divide(double a, double b) {
+        if (b == 0) {
             throw new ArithmeticException("Division durch 0 ist nicht erlaubt");
         }
-        return dividend / divisor;
+        return a / b;
     }
 }

@@ -35,7 +35,7 @@ public class BookingTests {
         assertEquals(42, booking.getDate());
         assertEquals(150000, booking.getAmount());
 
-        // auch negative Beträge (Abhebungen) sind als Buchung gültig
+        // Abhebungen sind Buchungen mit negativem Betrag
         Booking withdrawal = new Booking(43, -50000);
         assertEquals(-50000, withdrawal.getAmount());
     }
@@ -54,6 +54,6 @@ public class BookingTests {
         String output = out.toString();
 
         assertTrue(output.contains("01.01.1970"));
-        assertTrue(output.contains("1.00"), "Betrag muss formatiert erscheinen");
+        assertTrue(output.contains("1.00"));
     }
 }

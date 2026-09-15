@@ -14,25 +14,23 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PromoYouthSavingsAccountTests {
 
     /**
-     * Jede Einzahlung erhält 1% Bonus; sonst gelten die Sparkonto-Regeln.
+     * Jede Einzahlung gibt 1% Bonus, sonst gelten die Sparkonto-Regeln.
      */
     @Test
     public void test() {
         PromoYouthSavingsAccount account = new PromoYouthSavingsAccount("Y-1000");
 
-        // 10'000 einzahlen -> 1% Bonus -> 10'100
         assertTrue(account.deposit(1, 10000));
-        assertEquals(10100, account.getBalance());
+        assertEquals(10100, account.getBalance()); // 10000 + 1% Bonus
 
-        // Bonus wird ganzzahlig gerechnet: 99 / 100 = 0 Bonus
+        // Bonus ist Ganzzahl-Division: bei 99 gibts nichts
         assertTrue(account.deposit(2, 99));
         assertEquals(10199, account.getBalance());
 
-        // negative Einzahlung wird abgelehnt
         assertFalse(account.deposit(3, -1000));
         assertEquals(10199, account.getBalance());
 
-        // geerbte Sparkonto-Regel: nicht überziehbar
+        // geerbt vom Sparkonto: überziehen geht nicht
         assertFalse(account.withdraw(4, 99999));
         assertEquals(10199, account.getBalance());
     }
