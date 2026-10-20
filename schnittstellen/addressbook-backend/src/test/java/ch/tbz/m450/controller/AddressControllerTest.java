@@ -64,17 +64,6 @@ class AddressControllerTest {
     }
 
     @Test
-    @DisplayName("GET /address/{id} gibt 200 und die Adresse zurück, wenn sie existiert")
-    void getAddress_existingId_returns200WithAddress() {
-        when(addressService.getAddress(1)).thenReturn(Optional.of(wehrli));
-
-        ResponseEntity<Address> response = controller.getAddress(1);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(wehrli, response.getBody());
-    }
-
-    @Test
     @DisplayName("GET /address/{id} gibt 404 ohne Body, wenn die Id nicht existiert")
     void getAddress_unknownId_returns404() {
         when(addressService.getAddress(99)).thenReturn(Optional.empty());

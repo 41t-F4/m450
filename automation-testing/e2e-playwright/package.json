@@ -1,0 +1,13 @@
+{
+  "name": "m450-e2e-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "M450 Automation Testing Uebung 2 - E2E-Tests fuer die Angular-App (Playwright)",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

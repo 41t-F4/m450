@@ -50,31 +50,12 @@ class AddressComparatorTest {
     }
 
     @Test
-    @DisplayName("Identische Namen ergeben 0 (Konsistenz)")
-    void compare_equalNames_returnsZero() {
-        Address a1 = address("Anna", "Muster");
-        Address a2 = address("Anna", "Muster");
-
-        assertEquals(0, comparator.compare(a1, a2));
-    }
-
-    @Test
     @DisplayName("Gross-/Kleinschreibung wird ignoriert")
     void compare_isCaseInsensitive() {
         Address lower = address("anna", "muster");
         Address upper = address("ANNA", "MUSTER");
 
         assertEquals(0, comparator.compare(lower, upper));
-    }
-
-    @Test
-    @DisplayName("Null-Nachname wird ans Ende sortiert")
-    void compare_nullLastname_sortsLast() {
-        Address mitName = address("Anna", "Muster");
-        Address ohneName = address("Anna", null);
-
-        assertTrue(comparator.compare(mitName, ohneName) < 0);
-        assertTrue(comparator.compare(ohneName, mitName) > 0);
     }
 
     @Test

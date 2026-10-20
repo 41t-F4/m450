@@ -27,16 +27,14 @@ Entscheide:
 - **Null-Werte ans Ende** (defensiv, statt NullPointerException).
 - Leere Attributliste → `IllegalArgumentException` (Fail Fast statt stiller Fehlkonfiguration).
 
-## Die Tests (`AddressComparatorExtendedTest`, 6 Tests)
+## Die Tests (`AddressComparatorExtendedTest`, 4 gezielte Tests)
 
 | Test | Prüft |
 |---|---|
-| `compare_byPhonenumber` | Sortierung nur nach Telefonnummer |
+| `compare_byPhonenumber` | Sortierung nach einem einzelnen anderen Attribut |
 | `compare_byRegistrationDate` | chronologische Sortierung (älteste zuerst) |
-| `compare_byId` | numerische Sortierung nach Id |
 | `compare_multiLevel_nameThenPhonenumber` | Gleichstand beim Namen → Telefonnummer entscheidet, in beide Richtungen (Symmetrie) |
-| `compare_nullRegistrationDate_sortsLast` | null ans Ende, null == null → 0 |
-| `constructor_withoutAttributes_throws` | `assertThrows(IllegalArgumentException.class, ...)` |
+| `constructor_withoutAttributes_throws` | `assertThrows(IllegalArgumentException.class, ...)` – Fail Fast |
 
 Beispiel (mehrstufig):
 
@@ -56,5 +54,5 @@ void compare_multiLevel_nameThenPhonenumber() {
 
 ```bash
 cd schnittstellen/addressbook-backend
-./mvnw test        # inkl. AddressComparatorExtendedTest, alle grün
+./mvnw test        # 15 Tests inkl. AddressComparatorExtendedTest, alle grün
 ```

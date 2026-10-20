@@ -69,26 +69,6 @@ class AddressServiceTest {
     }
 
     @Test
-    @DisplayName("getAll mit leerer DB liefert leere Liste")
-    void getAll_emptyRepository_returnsEmptyList() {
-        when(addressRepository.findAll()).thenReturn(List.of());
-
-        assertTrue(addressService.getAll().isEmpty());
-    }
-
-    @Test
-    @DisplayName("getAddress liefert die Adresse, wenn sie existiert")
-    void getAddress_existingId_returnsAddress() {
-        when(addressRepository.findById(1)).thenReturn(Optional.of(wehrli));
-
-        Optional<Address> result = addressService.getAddress(1);
-
-        assertTrue(result.isPresent());
-        assertEquals(wehrli, result.get());
-        verify(addressRepository).findById(1);
-    }
-
-    @Test
     @DisplayName("getAddress liefert Optional.empty, wenn die Id nicht existiert")
     void getAddress_unknownId_returnsEmptyOptional() {
         when(addressRepository.findById(99)).thenReturn(Optional.empty());

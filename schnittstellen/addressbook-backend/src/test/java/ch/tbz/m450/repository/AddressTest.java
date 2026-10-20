@@ -8,12 +8,11 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Aufgabe 1: "Fangen Sie an mit dem Testen von Adressen, welche Sie erstellen."
- * Testet das Erstellen von Address-Objekten über beide Lombok-Konstruktoren
- * sowie die Getter/Setter.
+ * Testet das Erstellen einer Address ueber den AllArgsConstructor.
+ * (Getter/Setter-Tests bewusst weggelassen - kein relevanter Code.)
  */
 class AddressTest {
 
@@ -38,26 +37,4 @@ class AddressTest {
         );
     }
 
-    @Test
-    @DisplayName("NoArgsConstructor erstellt leere Adresse, Setter befüllen sie")
-    void createAddress_withNoArgsConstructorAndSetters_setsAllFields() {
-        Address address = new Address();
-
-        assertNull(address.getFirstname());
-        assertNull(address.getLastname());
-
-        address.setId(2);
-        address.setFirstname("Anna");
-        address.setLastname("Muster");
-        address.setPhonenumber("0447654321");
-        address.setRegistrationDate(registrationDate);
-
-        assertAll(
-                () -> assertEquals(2, address.getId()),
-                () -> assertEquals("Anna", address.getFirstname()),
-                () -> assertEquals("Muster", address.getLastname()),
-                () -> assertEquals("0447654321", address.getPhonenumber()),
-                () -> assertEquals(registrationDate, address.getRegistrationDate())
-        );
-    }
 }

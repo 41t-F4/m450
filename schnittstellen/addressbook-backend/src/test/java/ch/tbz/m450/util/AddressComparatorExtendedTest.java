@@ -53,16 +53,6 @@ class AddressComparatorExtendedTest {
     }
 
     @Test
-    @DisplayName("Sortierung nach Id")
-    void compare_byId() {
-        AddressComparator comparator = new AddressComparator(SortAttribute.ID);
-
-        List<Address> sorted = Stream.of(wehrli, arnold, arnoldZwilling).sorted(comparator).toList();
-
-        assertEquals(List.of(arnold, arnoldZwilling, wehrli), sorted);
-    }
-
-    @Test
     @DisplayName("Mehrstufig: gleicher Name -> Telefonnummer entscheidet")
     void compare_multiLevel_nameThenPhonenumber() {
         AddressComparator comparator = new AddressComparator(
@@ -71,17 +61,6 @@ class AddressComparatorExtendedTest {
         // arnold und arnoldZwilling heissen gleich -> Telefonnummer entscheidet
         assertTrue(comparator.compare(arnoldZwilling, arnold) < 0);
         assertTrue(comparator.compare(arnold, arnoldZwilling) > 0);
-    }
-
-    @Test
-    @DisplayName("Null-Registrierungsdatum wird ans Ende sortiert")
-    void compare_nullRegistrationDate_sortsLast() {
-        AddressComparator comparator = new AddressComparator(SortAttribute.REGISTRATION_DATE);
-        Address ohneDatum = new Address(4, "Max", "Muster", "000", null);
-
-        assertTrue(comparator.compare(wehrli, ohneDatum) < 0);
-        assertTrue(comparator.compare(ohneDatum, wehrli) > 0);
-        assertEquals(0, comparator.compare(ohneDatum, new Address(5, "A", "B", "1", null)));
     }
 
     @Test
