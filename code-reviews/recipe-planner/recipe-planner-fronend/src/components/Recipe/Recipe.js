@@ -1,6 +1,7 @@
 import './Recipe.css'
 import {Button, Card} from "react-bootstrap";
 import React from "react";
+import PropTypes from "prop-types";
 import {useNavigate} from "react-router-dom";
 
 function Recipe(props) {
@@ -16,5 +17,14 @@ function Recipe(props) {
         </Card>
     )
 }
+
+// Review-Finding Aufgabe 2: ohne id navigiert der Edit-Button auf /edit/undefined.
+// isRequired macht den Vertrag explizit und warnt im Dev-Modus, falls Browse die id vergisst.
+Recipe.propTypes = {
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    description: PropTypes.string,
+    image: PropTypes.string,
+};
 
 export default Recipe;

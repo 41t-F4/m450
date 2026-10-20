@@ -20,12 +20,23 @@ Implementation + Review nach Checkliste.
 | FE | `useEffect` ohne `[recipeId]`-Dependency → falsches Recipe bei Navigation zwischen zwei Edits | Gefixt |
 | – | Lombok der Vorgabe inkompatibel mit JDK 25 → `lombok.version` 1.18.42 | Build-Fix |
 
+## Review vom Kollegen auf meinem PR (41t-F4/m450 #2)
+
+| Datei | Kommentar | Entscheid |
+|---|---|---|
+| `Recipe.js` | «Wird `id` in `Browse.js` wirklich durchgereicht? Sonst navigiert der Button auf `/edit/undefined`» | **Echter Bug, gefixt.** `Browse.js` übergab die Id nicht. Mein eigener Test lief nur per curl gegen den PUT-Endpoint, nie durch die UI. Zusätzlich `PropTypes` mit `id: isRequired`, damit das im Dev-Modus sofort auffällt |
+| `EditRecipe.js` | `alert()` unterbricht den Flow, Fehler-State im UI wäre eleganter | **Übernommen** in Add und Edit: `errorMessage`-State, Anzeige als Bootstrap-`Alert` im Formular |
+
 ## Erkenntnisse
 - FE- und BE-Änderungen als **getrennte, kleine PRs** – kleine Diffs bekommen die
   besseren Reviews (Theorie: 200–400 Zeilen optimal).
 - Findings ausserhalb des Feature-Scopes gehören ins Protokoll/Follow-up, nicht in den PR.
 - Die Wiederverwendung (`RecipeForm`) entstand aus dem Review von Aufgabe 1 –
   Reviews verbessern auch die Architektur, nicht nur den einzelnen PR.
+- Der Reviewer fand den `/edit/undefined`-Bug durch **Lesen des Aufrufers**, nicht
+  der geänderten Datei: beim Review immer auch anschauen, wer die geänderte
+  Komponente benutzt. Und: eine Verifikation per API-Call ersetzt keinen Klick
+  durch die UI.
 
 Verifikation: Backend gestartet; POST → PUT (ändert Name + ersetzt Zutaten) →
 PUT auf unbekannte Id = 404 → GET zeigt den editierten Stand. Frontend-Build sauber.
