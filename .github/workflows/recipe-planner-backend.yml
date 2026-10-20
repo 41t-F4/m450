@@ -1,0 +1,115 @@
+# CI/CD-Pipeline fuer das Recipe-Planner-Backend (M450, Block CI/CD-Pipeline, Aufgabe 3)
+#
+# Begriffe GitLab -> GitHub Actions:
+#   Pipeline = Workflow | Stage = Job (Reihenfolge via `needs`) | Job = Step | Runner = `runs-on` | Artifacts = upload-artifact
+#
+# Stages wie in der Theorie: build -> test -> deploy (Report publizieren)
+
+name: Recipe Planner Backend CI
+
+on:
+  push:            # jeder Push triggert die Pipeline (Aufgabe 3)
+  pull_request:
+  workflow_dispatch:   # manuell startbar (fuers Demo-Video)
+
+env:
+  BACKEND_DIR: code-reviews/recipe-planner/recipe-planner-backend
+
+defaults:
+  run:
+    working-directory: code-reviews/recipe-planner/recipe-planner-backend
+
+jobs:
+  # ---------- Stage 1: Build ----------
+  build:
+    name: Build (Maven)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JDK 17 einrichten (Modul-Vorgabe; lokal laeuft JDK 25)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven            # ~/.m2 zwischen Laeufen cachen -> schnellere Pipeline
+      - name: Kompilieren und JAR bauen (ohne Tests)
+        run: ./mvnw --batch-mode -DskipTests package
+      - name: JAR als Artefakt ablegen
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: ${{ env.BACKEND_DIR }}/target/*.jar
+          retention-days: 7
+
+  # ---------- Stage 2: Test ----------
+  test:
+    name: Unit Tests + Reports
+    needs: build                # laeuft erst, wenn build erfolgreich war
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write             # fuer den Test-Report als Check im PR / Commit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Unit Tests ausfuehren (Surefire + JaCoCo)
+        run: ./mvnw --batch-mode test
+
+      - name: Testresultate (Surefire-XML) als Check anzeigen
+        uses: dorny/test-reporter@v2
+        if: always()            # auch bei roten Tests den Report zeigen
+        with:
+          name: JUnit Tests
+          path: ${{ env.BACKEND_DIR }}/target/surefire-reports/TEST-*.xml
+          reporter: java-junit
+
+      - name: Coverage in die Job-Zusammenfassung schreiben
+        if: always()
+        run: |
+          CSV=target/site/jacoco/jacoco.csv
+          awk -F, 'NR>1 {missed+=$4; covered+=$5} END {
+            total=missed+covered; pct=(total>0)?covered*100/total:0;
+            printf "## JaCoCo Coverage\n\n| Metrik | Wert |\n|---|---|\n| Instructions covered | %d / %d |\n| Coverage | **%.1f %%** |\n", covered, total, pct
+          }' "$CSV" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Reports als Artefakte ablegen
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: |
+            ${{ env.BACKEND_DIR }}/target/surefire-reports
+            ${{ env.BACKEND_DIR }}/target/site/jacoco
+          retention-days: 30
+
+  # ---------- Stage 3: Deploy (Report publizieren) ----------
+  # Pendant zu "GitLab Pages" aus der Theorie: der JaCoCo-HTML-Report wird auf GitHub Pages veroeffentlicht.
+  # Voraussetzung einmalig im Repo: Settings -> Pages -> Source = "GitHub Actions".
+  deploy-report:
+    name: Report auf GitHub Pages
+    needs: test
+    if: github.ref == 'refs/heads/main'   # nur vom Hauptbranch publizieren
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Reports aus dem Test-Job holen
+        uses: actions/download-artifact@v4
+        with:
+          name: test-reports
+          path: reports
+      - name: JaCoCo-HTML als Pages-Artefakt verpacken
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports/site/jacoco
+      - name: Auf GitHub Pages deployen
+        id: deployment
+        uses: actions/deploy-pages@v4
