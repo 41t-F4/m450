@@ -4,12 +4,12 @@ import {useForm, useFieldArray} from "react-hook-form";
 import {Form, Button, Col, Row} from 'react-bootstrap';
 import {useNavigate} from "react-router-dom";
 import {addRecipe} from "../../apis/recipeApi";
+import AddIngredient from "../AddIngredient/AddIngredient";
 
 // Aufgabe 1: Feature "neues Recipe hinzufuegen".
 // Variante A (uebernommen): react-hook-form mit useFieldArray fuer die Zutaten-Zeilen.
 // Die Feldnamen entsprechen 1:1 dem Backend-Domain-Objekt (name, comment, unit, amount).
-const UNITS = ['PIECE', 'GRAMM', 'KILOGRAMM', 'LITRE', 'DECILITRE'];
-
+// Die einzelne Zutaten-Zeile ist in AddIngredient ausgelagert (Review-Finding: SRP).
 const EMPTY_INGREDIENT = {name: '', comment: '', unit: 'PIECE', amount: 1};
 
 function AddRecipe() {
@@ -26,15 +26,8 @@ function AddRecipe() {
 
     const {fields, append, remove} = useFieldArray({control, name: "ingredients"});
 
-    const submit = (formRecipe) => {
-        // amount kommt aus dem Input als String -> ins Backend-Format (int) wandeln
-        const recipe = {
-            ...formRecipe,
-            ingredients: formRecipe.ingredients.map(ingredient => ({
-                ...ingredient,
-                amount: parseInt(ingredient.amount, 10),
-            })),
-        };
+    const submit = (recipe) => {
+        // amount kommt dank valueAsNumber (siehe AddIngredient) bereits als Zahl an
         addRecipe(recipe)
             .then(() => navigate("/"))
             .catch((error) => alert("Could not save recipe: " + error.message));
@@ -66,31 +59,8 @@ function AddRecipe() {
                 </Row>
                 <hr/>
                 {fields.map((field, index) => (
-                    <Row key={field.id}>
-                        <Col>
-                            <Form.Group className="mb-1">
-                                <Form.Control placeholder="Name"
-                                              {...register(`ingredients.${index}.name`, {required: true})}/>
-                            </Form.Group>
-                        </Col>
-                        <Col>
-                            <Form.Group className="mb-1">
-                                <Form.Select {...register(`ingredients.${index}.unit`)}>
-                                    {UNITS.map(unit => <option key={unit}>{unit}</option>)}
-                                </Form.Select>
-                            </Form.Group>
-                        </Col>
-                        <Col>
-                            <Form.Group className="mb-1">
-                                <Form.Control type="number" min="1" placeholder="Quantity"
-                                              {...register(`ingredients.${index}.amount`, {required: true})}/>
-                            </Form.Group>
-                        </Col>
-                        <Col xs={1}>
-                            <Button onClick={() => remove(index)} variant='outline-dark'
-                                    className="mb-1">x</Button>
-                        </Col>
-                    </Row>
+                    <AddIngredient key={field.id} index={index} register={register}
+                                   errors={errors} onRemove={() => remove(index)}/>
                 ))}
                 <Row>
                     <Col>
