@@ -1,32 +1,37 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import './Browse.css';
+import axios from "axios";
 import Recipe from "../Recipe/Recipe";
 import {Col, Row} from "react-bootstrap";
-import {getRecipes} from "../../apis/recipeApi";
+
+const baseURL = "http://localhost:8080/api/recipes";
+
 
 const Browse = () => {
 
-    const [recipes, setRecipes] = React.useState(null);
+        const [post, setPost] = React.useState(null);
 
-    React.useEffect(() => {
-        getRecipes().then((response) => {
-            setRecipes(response.data);
-        });
-    }, []);
+        React.useEffect(() => {
+            axios.get(baseURL).then((response) => {
+                setPost(response.data);
+            });
+        }, []);
 
-    if (!recipes) return null;
+        if (!post) return null;
 
-    return (
-        <Row>
-            {recipes.map((recipe) => (
-                <Col key={recipe.id} sm={12} md={6} lg={4} xl={3}>
-                    <Recipe id={recipe.id} title={recipe.name}
-                            description={recipe.description} image={recipe.imageUrl}/>
-                </Col>
-            ))}
-        </Row>
-    );
+        return (
+            <>
+                <Row>
+                    {post.map((d) => (
+                        <Col sm={12} md={6} lg={4} xl={3}>
+                            <Recipe title={d.name} description={d.description} image={d.imageUrl} />
+                        </Col>
+                    ))}
+                </Row>
+            </>
+        );
 }
+
 
 Browse.propTypes = {};
 
