@@ -11,3 +11,6 @@ export const getRecipe = (recipeId) => axios.get(`${baseURL}/recipe/${recipeId}`
 export const addRecipe = (recipe) => axios.post(baseURL, recipe);
 
 export const updateRecipe = (recipeId, recipe) => axios.put(`${baseURL}/recipe/${recipeId}`, recipe);
+
+// TDD-Feature Einkaufsliste: Body = Rezept-Ids, Antwort = zusammengefasste Zutaten
+export const createShoppingList = (recipeIds) => axios.post("http://localhost:8080/api/shopping-list", recipeIds);
